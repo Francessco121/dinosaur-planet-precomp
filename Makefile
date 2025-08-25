@@ -8,7 +8,7 @@ SRC_DIRS := $(shell find $(SRC_DIR)/ -type d)
 BUILD_SRC_DIRS := $(addprefix $(BUILD_DIR)/,$(SRC_DIRS))
 
 # Tools
-CROSS := mips-n64-
+CROSS := mips64-ultra-elf-
 
 CC      := $(CROSS)gcc
 AS      := $(CROSS)gcc

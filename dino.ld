@@ -22,10 +22,10 @@ OUTPUT_ARCH (mips)
     .segment##symbol##offset##_patch symbol + offset : AT(_##segment##SegmentRomStart + symbol - _##segment##SegmentStart + offset)
     
 #define CODE_PATCH(segment, symbol, offset) \
-    .segment##symbol##offset##_patch symbol + offset : AT(code_##segment##_ROM_START + symbol - code_##segment##_VRAM + offset)
+    .segment##symbol##offset##_patch symbol + offset : AT(segment##_ROM_START + symbol - segment##_VRAM + offset)
 
 #define JAL_HOOK(segment, symbol, offset, helper, name) \
-    .segment##symbol##offset##_patch symbol + offset : AT(code_##segment##_ROM_START + symbol - code_##segment##_VRAM + offset) \
+    .segment##symbol##offset##_patch symbol + offset : AT(segment##_ROM_START + symbol - segment##_VRAM + offset) \
     { \
         name = .; \
         BYTE(0x0C); \
