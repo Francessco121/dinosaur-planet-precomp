@@ -63,7 +63,7 @@ $(ELF) : $(OBJS) $(BUILD_DIR)/$(LD_SCRIPT) $(ELF_IN)
 	$(LD) -R $(ELF_IN) $(LDFLAGS) -Map $(@:.elf=.map) -o $@
 	
 $(Z64_IN) : $(ELF_IN) | $(BUILD_DIR)
-	$(OBJCOPY) $(Z64OFLAGS) $< $@
+	$(OBJCOPY) $(Z64OFLAGS) --remove-section .leftovers --remove-section .trailer $< $@
 
 $(Z64_IN_OBJ) : $(Z64_IN) | $(BUILD_DIR)
 	$(OBJCOPY) $(BINOFLAGS) $< $@
