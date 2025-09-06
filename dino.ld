@@ -60,66 +60,58 @@ SECTIONS
     }
     END_SEG(baserom)
     baseromEnd = __romPos;
+
+    __romPos = 0xA4970;
+    BEGIN_SEG(assets, .)
+    {
+        ASSETS;
+    }
+    END_SEG(assets)
+    assetsEnd = __romPos;
     
     bss_end = 0xFFFFFFFF800D4370;
     . = bss_end;
+    __romPos = ALIGN(__romPos, 16);
     BEGIN_SEG(custom, .)
     {
-        BUILD_DIR/src/custom/init.o(.text);
-        BUILD_DIR/src/custom/game_tick.o(.text);
-        BUILD_DIR/src/custom/diprint.o(.text);
+        BUILD_DIR/src/core/custom/init.o(.text);
+        BUILD_DIR/src/core/custom/game_tick.o(.text);
+        BUILD_DIR/src/core/custom/diprint.o(.text);
 
-        BUILD_DIR/src/custom/init.o(.*data*);
-        BUILD_DIR/src/custom/game_tick.o(.*data*);
-        BUILD_DIR/src/custom/diprint.o(.*data*);
+        BUILD_DIR/src/core/custom/init.o(.*data*);
+        BUILD_DIR/src/core/custom/game_tick.o(.*data*);
+        BUILD_DIR/src/core/custom/diprint.o(.*data*);
+
+        . = ALIGN(16);
     }
     END_SEG(custom)
     BEGIN_NOLOAD(custom)
     {
-        BUILD_DIR/src/custom/init.o(.bss);
-        BUILD_DIR/src/custom/game_tick.o(.bss);
-        BUILD_DIR/src/custom/diprint.o(.bss);
+        BUILD_DIR/src/core/custom/init.o(.bss);
+        BUILD_DIR/src/core/custom/game_tick.o(.bss);
+        BUILD_DIR/src/core/custom/diprint.o(.bss);
+
+        . = ALIGN(16);
     }
     END_NOLOAD(custom)
 
     /* Patch init_memory to start heap after the custom segment (otherwise it overlaps). */
     CODE_PATCH(segment, init_memory, 0x14)
     {
-        BUILD_DIR/src/patches/memory.o(.text);
+        BUILD_DIR/src/core/patches/memory.o(.text);
     }
 
     /* Hijack init_filesystem right after osCreatePiManager is called to load our custom segment. */
     /* The custom init function will finish up what init_filesystem was originally doing. */
     CODE_PATCH(segment, init_filesystem, 0x54)
     {
-        BUILD_DIR/src/patches/custom_seg_load.o(.text);
+        BUILD_DIR/src/core/patches/custom_seg_load.o(.text);
     }
 
     /* Patch out dongle check */
     CODE_PATCH(segment, check_dongle, 0x0)
     {
-        BUILD_DIR/src/patches/dongle.o(.text);
-    }
-
-    /* Patch out more security checks */
-    /* TODO: do these properly with actual DLL patches */
-    /* 0x38317CC + 0xAB70 + 0x6500 */
-    ROM_PATCH(0x384283C)
-    {
-        /* b L_8101254C */
-        BYTE(0x10);
-        BYTE(0x00);
-        BYTE(0x00);
-        BYTE(0x12);
-    }
-    /* 0x38317CC + 0xE7CA0 + 0xA7D4 */
-    ROM_PATCH(0x3923C40)
-    {
-        /* b L_81177828 */
-        BYTE(0x10);
-        BYTE(0x00);
-        BYTE(0x00);
-        BYTE(0x14);
+        BUILD_DIR/src/core/patches/dongle.o(.text);
     }
 
     /* Hook game_tick right before diPrintfAll is called */
@@ -131,7 +123,7 @@ SECTIONS
 
     ROM_PATCH(0x000000)
     {
-        BUILD_DIR/src/patches/header.o(.data);
+        BUILD_DIR/src/core/patches/header.o(.data);
     }
 
     /* Discard everything not specifically mentioned above. */

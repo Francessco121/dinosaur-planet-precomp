@@ -1,0 +1,26 @@
+.include "dll_macro.inc"
+
+.patch dll_210_func_A3FC 0x278
+/* A7D4 00A674 85420000 */ b           .LA6C8  # @precomp: Skip dongle check
+/* A7D8 00A678 3C0CBC00 */ nop
+/* A7DC 00A67C 858D0002 */ nop
+/* A7E0 00A680 3C014C53 */ nop
+/* A7E4 00A684 00025C00 */ nop
+/* A7E8 00A688 34214653 */ nop
+/* A7EC 00A68C 016D1025 */ nop
+/* A7F0 00A690 1041000D */ nop
+/* A7F4 00A694 8FA40050 */ nop
+/* A7F8 00A698 3C014D50 */ nop
+/* A7FC 00A69C 34214653 */ nop
+/* A800 00A6A0 5041000A */ nop
+/* A804 00A6A4 8FAE0050 */ nop
+/* A808 00A6A8 8F9901F4 */ nop
+/* A80C 00A6AC 3C050010 */ nop
+/* A810 00A6B0 AFA8004C */ nop
+/* A814 00A6B4 0320F809 */ nop
+/* A818 00A6B8 00000000 */ nop
+/* A81C 00A6BC 44801000 */ nop
+/* A820 00A6C0 8FBC0018 */ nop
+/* A824 00A6C4 8FA8004C */ nop
+.LA6C8:
+/* A828 00A6C8 8FAE0050 */ lw          $t6, 0x50($sp)

@@ -4,8 +4,9 @@
 extern Gfx *gCurGfx;
 
 void custom_game_tick(void) {
-    diPrintf("hello world!");
+    diPrintf("hello precomp!");
 
+    // // // // // // // // // // // // // 
     // Restore overwritten game_tick code
     diPrintfAll(&gCurGfx);
 }

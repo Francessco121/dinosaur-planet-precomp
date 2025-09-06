@@ -1,6 +1,4 @@
 #include <macro.inc>
-.set noat
-.set noreorder
 .section .text
 
 # void read_from_rom(u32 romAddr, u8* dst, s32 size)

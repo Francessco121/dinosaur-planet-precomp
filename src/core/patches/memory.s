@@ -1,6 +1,4 @@
 #include <macro.inc>
-.set noat
-.set noreorder
 .section .text
 
 # To patch init_memory+0x14

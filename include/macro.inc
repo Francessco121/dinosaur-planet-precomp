@@ -1,6 +1,8 @@
-# Assembly Macros
+# Assembly Macros (for core patches)
 
 .set gp=64
+.set noat
+.set noreorder
 
 .set K0BASE, 0x80000000
 .set K1BASE, 0xA0000000

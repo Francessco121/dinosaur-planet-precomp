@@ -1,0 +1,5 @@
+# dinosaur-planet-precomp
+ninja>=1.11.1.1
+
+# dinosaur-planet
+-r ../dinosaur-planet/requirements.txt

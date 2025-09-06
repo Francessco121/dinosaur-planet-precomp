@@ -1,0 +1,4 @@
+3 = engine/3_ANIM
+60 = engine/60
+
+210 = objects/210_player
