@@ -1,3 +1,5 @@
+#if DEBUG
+
 #include "PR/os.h"
 #include "PR/ultratypes.h"
 #include "libc/stdarg.h"
@@ -17,3 +19,7 @@ int custom_vsprintf(char *s, const char *fmt, va_list args) {
 	
     return (ret);
 }
+
+#else
+typedef int prevent_pedantic_warning;
+#endif // DEBUG

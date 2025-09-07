@@ -227,7 +227,7 @@ def remap(elf: EditedELF):
         if isinstance(section, EditedRelocationSection):
             for reloc in section.relocations:
                 reloc_symidx = reloc.entry['r_info_sym']
-                reloc.entry['r_info_sym'] = sym_remap.get(reloc_symidx, "STN_UNDEF")
+                reloc.entry['r_info_sym'] = sym_remap.get(reloc_symidx, 0) # 0 = STN_UNDEF
 
 def patch_file(elf_file: BufferedReader, output: BufferedWriter):
     # Read base ELF

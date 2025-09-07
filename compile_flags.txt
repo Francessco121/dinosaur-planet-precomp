@@ -3,6 +3,7 @@
 -DF3DEX_GBI_2
 -D_LANGUAGE_C
 -D_MIPS_SZLONG=32
+-DDEBUG
 -c
 -target
 mips

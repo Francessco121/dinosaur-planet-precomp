@@ -14,6 +14,10 @@ from tools.fs_packer import FS_MAP
 SCRIPT_DIR = Path(os.path.dirname(os.path.realpath(__file__)))
 DECOMP_DIR = Path("../dinosaur-planet").absolute().resolve()
 
+class BuildConfig:
+    def __init__(self, release_build: bool):
+        self.release_build = release_build
+
 class DecompFileCopy:
     def __init__(self, decomp_path: Path, build_path: Path):
         self.decomp_path = decomp_path
@@ -48,9 +52,10 @@ class BuildFiles:
         self.dlls = dlls
 
 class BuildNinjaWriter:
-    def __init__(self, writer: ninja.Writer, input: BuildFiles):
+    def __init__(self, writer: ninja.Writer, input: BuildFiles, config: BuildConfig):
         self.writer = writer
         self.input = input
+        self.config = config
         self.link_deps: "list[str]" = []
 
     def write(self):
@@ -105,8 +110,24 @@ class BuildNinjaWriter:
             "-DF3DEX_GBI_2",
         ]
 
+        if not self.config.release_build:
+            common_defines.append("-DDEBUG")
+
         self.writer.variable("GCC_DEFINES", " ".join(common_defines))
-        self.writer.variable("CC_DEFINES", " ".join(common_defines + ["-D_LANGUAGE_C"]))
+
+        gcc_as_defines = []
+
+        if not self.config.release_build:
+            gcc_as_defines.append("-DDEBUG")
+
+        self.writer.variable("GCC_AS_DEFINES", " ".join(gcc_as_defines))
+
+        as_defines = []
+
+        if not self.config.release_build:
+            as_defines.append("--defsym DEBUG=1")
+
+        self.writer.variable("AS_DEFINES", " ".join(as_defines))
 
         self.writer.variable("INCLUDES", " ".join([
             "-I include",
@@ -189,7 +210,7 @@ class BuildNinjaWriter:
             "--no-strip-discarded",
         ]))
 
-        self.writer.variable("CPP_LDFLAGS", " ".join([
+        cpp_ldflags = [
             "-P",
             "-Wno-trigraphs",
             "-DBUILD_DIR=$BUILD_DIR",
@@ -197,7 +218,12 @@ class BuildNinjaWriter:
             "-DBASEROM=$Z64_IN_OBJ",
             "-DASSETS=$ASSETS_OBJ",
             "-I include",
-        ]))
+        ]
+
+        if not self.config.release_build:
+            cpp_ldflags.append("-DDEBUG")
+
+        self.writer.variable("CPP_LDFLAGS", " ".join(cpp_ldflags))
 
         self.writer.variable("OPTFLAGS", " ".join(["-Os"]))
         self.writer.variable("ELF_IN_TO_Z64_IN_FLAGS", " ".join([
@@ -242,12 +268,12 @@ class BuildNinjaWriter:
             "Compiling $in...",
             depfile="$out.d")
         self.writer.rule("gcc_as", 
-            "$GCC $ASFLAGS $INCLUDES -MD -MF $out.d -o $out $in", 
-            "Compiling $in...",
+            "$GCC $ASFLAGS $GCC_AS_DEFINES $INCLUDES -MD -MF $out.d -o $out $in", 
+            "Assembling $in...",
             depfile="$out.d")
         self.writer.rule("as_dll", 
-            "$AS $DLL_ASFLAGS $INCLUDES -MD $out.d -o $out $in", 
-            "Compiling $in...",
+            "$AS $DLL_ASFLAGS $AS_DEFINES $INCLUDES -MD $out.d -o $out $in", 
+            "Assembling $in...",
             depfile="$out.d")
         self.writer.rule("ld", 
             "$LD -R $ELF_IN $LDFLAGS -Map $MAPFILE -o $out", 
@@ -528,11 +554,15 @@ class InputScanner:
 def main():
     parser = argparse.ArgumentParser(description="Creates the Ninja build script for Dinosaur Planet precomp.")
     parser.add_argument("--base-dir", type=str, dest="base_dir", help="The root of the project.", default=str(SCRIPT_DIR))
+    parser.add_argument("-r", "--release", action="store_true", help="Configure a release build (without 'DEBUG' defined).", default=False)
     
     args = parser.parse_args()
 
     # Do all path lookups from the base directory
     os.chdir(Path(args.base_dir).resolve())
+
+    # Make config
+    config = BuildConfig(release_build=args.release)
 
     # Gather input files
     scanner = InputScanner()
@@ -540,7 +570,7 @@ def main():
 
     # Write ninja build file
     with open("build.ninja", "w") as ninja_file:
-        writer = BuildNinjaWriter(ninja.Writer(ninja_file), input)
+        writer = BuildNinjaWriter(ninja.Writer(ninja_file), input, config)
         writer.write()
 
 

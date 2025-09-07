@@ -1,3 +1,5 @@
+#if DEBUG
+
 #include "sys/print.h"
 #include "sys/gfx/texture.h"
 
@@ -58,3 +60,7 @@ int custom_diPrintf(const char* fmt, ...) {
 
     return 0;
 }
+
+#else
+typedef int prevent_pedantic_warning;
+#endif // DEBUG

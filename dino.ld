@@ -77,17 +77,21 @@ SECTIONS
     {
         BUILD_DIR/src/core/custom/init.o(.text);
         BUILD_DIR/src/core/custom/game_tick.o(.text);
+#if DEBUG
         BUILD_DIR/src/core/custom/diprint.o(.text);
         BUILD_DIR/src/core/custom/vsprintf.o(.text);
         BUILD_DIR/src/core/custom/xldtob.o(.text);
         BUILD_DIR/src/core/custom/xprintf.o(.text);
+#endif
 
         BUILD_DIR/src/core/custom/init.o(.*data*);
         BUILD_DIR/src/core/custom/game_tick.o(.*data*);
+#if DEBUG
         BUILD_DIR/src/core/custom/diprint.o(.*data*);
         BUILD_DIR/src/core/custom/vsprintf.o(.*data*);
         BUILD_DIR/src/core/custom/xldtob.o(.*data*);
         BUILD_DIR/src/core/custom/xprintf.o(.*data*);
+#endif
 
         . = ALIGN(16);
     }
@@ -96,10 +100,12 @@ SECTIONS
     {
         BUILD_DIR/src/core/custom/init.o(.bss);
         BUILD_DIR/src/core/custom/game_tick.o(.bss);
+#if DEBUG
         BUILD_DIR/src/core/custom/diprint.o(.bss);
         BUILD_DIR/src/core/custom/vsprintf.o(.bss);
         BUILD_DIR/src/core/custom/xldtob.o(.bss);
         BUILD_DIR/src/core/custom/xprintf.o(.bss);
+#endif
 
         . = ALIGN(16);
     }
@@ -134,6 +140,7 @@ SECTIONS
     /* Hook game_tick right before diPrintfAll is called */
     JAL_HOOK(segment, game_tick, 0x230, custom_game_tick, custom_game_tick_hook)
 
+#if DEBUG
     /* Restore diPrintf */
     J_HOOK_NOP(segment, diPrintfInit, 0x0, custom_diPrintfInit, custom_diPrintfInit_hook)
     J_HOOK_NOP(segment, diPrintf, 0x0, custom_diPrintf, custom_diPrintf_hook)
@@ -142,7 +149,7 @@ SECTIONS
     J_HOOK_NOP(segment, _Printf, 0x0, _Printf_patch, _Printf_patch_hook)
     J_HOOK_NOP(segment, _Ldtob, 0x0, _Ldtob_patched, _Ldtob_patched_hook)
     J_HOOK_NOP(segment, vsprintf, 0x0, custom_vsprintf, custom_vsprintf_hook)
-
+#endif
 
     ROM_PATCH(0x000000)
     {

@@ -1,5 +1,4 @@
-// RECOMP: Recompile _Ldtob since it was compiled with a compiler bug in the game
-// causing float -> string conversions to not work most of the time.
+#if DEBUG
 
 #include "libc/stdlib.h"
 #include "libc/string.h"
@@ -391,3 +390,7 @@ void _Genld(printf_struct *px, char code, char *p, short nsig, short xexp)
 		}
 	}
 }
+
+#else
+typedef int prevent_pedantic_warning;
+#endif // DEBUG

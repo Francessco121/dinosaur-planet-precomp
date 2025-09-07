@@ -1,3 +1,5 @@
+#if DEBUG
+
 #include "PR/ultratypes.h"
 #include "libc/stdlib.h"
 #include "libc/stdarg.h"
@@ -267,3 +269,7 @@ int _Printf_patch(outfun prout, char *arg, const char *fmt, va_list args)
 
 	return 0;
 }
+
+#else
+typedef int prevent_pedantic_warning;
+#endif // DEBUG

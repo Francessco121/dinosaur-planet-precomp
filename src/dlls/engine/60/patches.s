@@ -4,10 +4,12 @@
 .patch data_18
     .word 0x009c44ff
 
+.ifdef DEBUG
 # dll_60_update2 does nothing, change it to run our custom code
 .patch dll_60_update2
     b dll_60_custom_func
      nop
+.endif
 
 # hook dll_60_update1 to allow the menu to be skipped
 .patch dll_60_update1

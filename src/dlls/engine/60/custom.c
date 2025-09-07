@@ -13,10 +13,12 @@ extern f32 bss_8;
 extern f32 bss_C;
 extern f32 bss_10;
 
+#if DEBUG
 void dll_60_custom_func(void) {
     diPrintf("dll 60 bss_0 = %.2f\n", bss_0);
     diPrintf("dll 60 bss_6 = %d\n", bss_6);
 }
+#endif
 
 void splash_skip_update(void) {
     if (data_4 == 1) {
