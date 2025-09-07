@@ -1,3 +1,4 @@
+1 = engine/1_cmdmenu
 3 = engine/3_ANIM
 60 = engine/60
 61 = engine/61

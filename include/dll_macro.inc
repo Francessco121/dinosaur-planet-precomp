@@ -9,6 +9,12 @@
 .set K1BASE, 0xA0000000
 .set K2BASE, 0xC0000000
 
+# Global offset table offsets for section addresses
+.set GOT_TEXT, 0x0
+.set GOT_RODATA, 0x4
+.set GOT_DATA, 0x8
+.set GOT_BSS, 0xC
+
 .macro glabel label
     .global \label
     .balign 4
