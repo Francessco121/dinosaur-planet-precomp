@@ -15,6 +15,7 @@ extern f32 bss_10;
 
 #if DEBUG
 void dll_60_custom_func(void) {
+    diPrintfSetBG(36, 97, 72, 255);
     diPrintf("dll 60 bss_0 = %.2f\n", bss_0);
     diPrintf("dll 60 bss_6 = %d\n", bss_6);
 }

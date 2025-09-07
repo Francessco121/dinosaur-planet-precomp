@@ -93,6 +93,8 @@ class BuildNinjaWriter:
         
         self.writer.variable("LD_SCRIPT", "$TARGET.ld")
         self.writer.variable("DLL_LD_SCRIPT", "dll.ld")
+        self.writer.variable("CORE_EXPORTS_TXT", "custom_core_exports.txt")
+        self.writer.variable("EXPORTS_LD_SCRIPT", "$BUILD_DIR/${TARGET}_custom_dll_exports.ld")
 
         self.writer.variable("ELF_IN", "$DECOMP_DIR/build/dino.elf")
 
@@ -252,6 +254,7 @@ class BuildNinjaWriter:
         self.writer.variable("CKSUM", f"{sys.executable} tools/n64cksum.py")
         self.writer.variable("FS_PACKER", f"{sys.executable} tools/fs_packer.py")
         self.writer.variable("ELF_PATCHER", f"{sys.executable} tools/elf_patcher.py")
+        self.writer.variable("MAKE_DLLSIMPORTTAB", f"{sys.executable} tools/make_dllsimporttab.py")
         self.writer.variable("DINO_DLL", f"{sys.executable} $DECOMP_DIR/tools/dino_dll.py")
         self.writer.variable("ELF2DLL", f"{sys.executable} $DECOMP_DIR/tools/elf2dll.py")
 
@@ -298,6 +301,9 @@ class BuildNinjaWriter:
                          "$DINO_DLL pack $BUILD_DIR/assets/dlls $BUILD_DIR/assets/DLLS.bin $DECOMP_DIR/bin/assets/DLLS_tab.bin "
                             + "--tab_out $BUILD_DIR/assets/DLLS_tab.bin --quiet", 
                          "Repacking DLLs...")
+        self.writer.rule("make_dllsimporttab", 
+                         "$MAKE_DLLSIMPORTTAB -e $ELF_IN -s $CORE_EXPORTS_TXT -l $EXPORTS_LD_SCRIPT -o $out $in", 
+                         "Rebuilding DLLSIMPORTTAB...")
 
         self.writer.newline()
 
@@ -325,6 +331,14 @@ class BuildNinjaWriter:
     def __write_dll_builds(self):
         pack_deps: "list[str]" = []
 
+        self.writer.comment("DLL imports")
+        self.writer.build(
+            "$BUILD_DIR/assets/DLLSIMPORTTAB.bin",
+            "make_dllsimporttab",
+            f"$DECOMP_DIR/bin/assets/DLLSIMPORTTAB.bin",
+            implicit=["$ELF_IN", "$CORE_EXPORTS_TXT"],
+            implicit_outputs=["$EXPORTS_LD_SCRIPT"])
+
         self.writer.comment("DLL compilation")
         for dll in self.input.dlls:
             self.writer.comment(f"DLL {dll.number}")
@@ -333,6 +347,7 @@ class BuildNinjaWriter:
             dll_link_deps: "list[str]" = []
             # The first link dep *MUST* be the ELF from the decomp
             dll_link_deps.append(f"$DECOMP_DIR/build/src/dlls/{dll.decomp_dir}/{dll.number}.elf")
+            dll_link_deps.append("$EXPORTS_LD_SCRIPT")
 
             # Compile DLL sources
             for file in dll.files:
@@ -519,7 +534,7 @@ class InputScanner:
             # Rebuild ourselves
             "DLLS.bin", # 46
             "DLLS_tab.bin", # 47
-            #"DLLSIMPORTTAB.bin", # 48 # TODO
+            "DLLSIMPORTTAB.bin", # 48
             # Zero size assets don't exist
             "CACHEFON.bin", # 11
             "CACHEFON2.bin", # 12
