@@ -14,7 +14,7 @@ extern f32 bss_C;
 extern f32 bss_10;
 
 void dll_60_custom_func(void) {
-    diPrintf("dll 60 bss_0 = %d\n", (int)bss_0);
+    diPrintf("dll 60 bss_0 = %.2f\n", bss_0);
     diPrintf("dll 60 bss_6 = %d\n", bss_6);
 }
 

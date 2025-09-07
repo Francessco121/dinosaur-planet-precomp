@@ -16,7 +16,8 @@ OUTPUT_ARCH (mips)
     .name.noload (NOLOAD) :
 
 #define END_NOLOAD(name) \
-    _##name##SegmentNoloadEnd = ADDR(.name.noload) + SIZEOF(.name.noload);
+    _##name##SegmentNoloadEnd = ADDR(.name.noload) + SIZEOF(.name.noload); \
+    _##name##SegmentNoloadSize = _##name##SegmentNoloadEnd - _##name##SegmentNoloadStart;
 
 #define PATCH(segment, symbol, offset) \
     .segment##symbol##offset##_patch symbol + offset : AT(_##segment##SegmentRomStart + symbol - _##segment##SegmentStart + offset)
@@ -77,10 +78,16 @@ SECTIONS
         BUILD_DIR/src/core/custom/init.o(.text);
         BUILD_DIR/src/core/custom/game_tick.o(.text);
         BUILD_DIR/src/core/custom/diprint.o(.text);
+        BUILD_DIR/src/core/custom/vsprintf.o(.text);
+        BUILD_DIR/src/core/custom/xldtob.o(.text);
+        BUILD_DIR/src/core/custom/xprintf.o(.text);
 
         BUILD_DIR/src/core/custom/init.o(.*data*);
         BUILD_DIR/src/core/custom/game_tick.o(.*data*);
         BUILD_DIR/src/core/custom/diprint.o(.*data*);
+        BUILD_DIR/src/core/custom/vsprintf.o(.*data*);
+        BUILD_DIR/src/core/custom/xldtob.o(.*data*);
+        BUILD_DIR/src/core/custom/xprintf.o(.*data*);
 
         . = ALIGN(16);
     }
@@ -90,6 +97,9 @@ SECTIONS
         BUILD_DIR/src/core/custom/init.o(.bss);
         BUILD_DIR/src/core/custom/game_tick.o(.bss);
         BUILD_DIR/src/core/custom/diprint.o(.bss);
+        BUILD_DIR/src/core/custom/vsprintf.o(.bss);
+        BUILD_DIR/src/core/custom/xldtob.o(.bss);
+        BUILD_DIR/src/core/custom/xprintf.o(.bss);
 
         . = ALIGN(16);
     }
@@ -120,6 +130,12 @@ SECTIONS
     /* Restore diPrintf */
     J_HOOK_NOP(segment, diPrintfInit, 0x0, custom_diPrintfInit, custom_diPrintfInit_hook)
     J_HOOK_NOP(segment, diPrintf, 0x0, custom_diPrintf, custom_diPrintf_hook)
+
+    /* Fix *printf floating point args */
+    J_HOOK_NOP(segment, _Printf, 0x0, _Printf_patch, _Printf_patch_hook)
+    J_HOOK_NOP(segment, _Ldtob, 0x0, _Ldtob_patched, _Ldtob_patched_hook)
+    J_HOOK_NOP(segment, vsprintf, 0x0, custom_vsprintf, custom_vsprintf_hook)
+
 
     ROM_PATCH(0x000000)
     {
