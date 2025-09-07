@@ -124,6 +124,13 @@ SECTIONS
         BUILD_DIR/src/core/patches/dongle.o(.text);
     }
 
+    /* Increase audio command list buffer size */
+    /* The game overflows this in a few areas... */
+    CODE_PATCH(segment, init_audio, 0x220)
+    {
+        BUILD_DIR/src/core/patches/audio_buffer.o(.text);
+    }
+
     /* Hook game_tick right before diPrintfAll is called */
     JAL_HOOK(segment, game_tick, 0x230, custom_game_tick, custom_game_tick_hook)
 
