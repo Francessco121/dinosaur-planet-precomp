@@ -18,3 +18,6 @@ For details on what precomp is, see https://github.com/Mr-Wiseguy/N64-Precomp-Ex
 1. Run a build for the Dinosaur Planet decompilation.
 2. Run `./configure.py`
 3. Run `ninja`
+
+> [!TIP]
+> Run `./dino.py extract --disassemble-all` in the decomp to get a disassembly for all functions (by default only nonmatchings are disassembled).

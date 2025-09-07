@@ -2,13 +2,9 @@
 
 import argparse
 from enum import Enum
-from genericpath import isdir
 import glob
-import json
 import os
 from pathlib import Path
-import re
-from shutil import which
 import sys
 from typing import OrderedDict, TextIO
 import ninja
@@ -224,6 +220,7 @@ class BuildNinjaWriter:
         self.writer.variable("OBJCOPY", f"{cross}objcopy")
         self.writer.variable("CKSUM", f"{sys.executable} tools/n64cksum.py")
         self.writer.variable("FS_PACKER", f"{sys.executable} tools/fs_packer.py")
+        self.writer.variable("ELF_PATCHER", f"{sys.executable} tools/elf_patcher.py")
         self.writer.variable("DINO_DLL", f"{sys.executable} $DECOMP_DIR/tools/dino_dll.py")
         self.writer.variable("ELF2DLL", f"{sys.executable} $DECOMP_DIR/tools/elf2dll.py")
 
@@ -263,7 +260,8 @@ class BuildNinjaWriter:
         self.writer.rule("bin_to_o", "$OBJCOPY $in $out $BIN_TO_O_FLAGS", 
                          "Converting $in to $out...")
         self.writer.rule("file_copy", "cp $in $out", "Copying $in to $out...")
-        self.writer.rule("elf2dll", "$ELF2DLL -o $out -b $DLL_BSS_TXT --patches $in", "Converting $in to DP DLL $out...")
+        self.writer.rule("patch_elf", "$ELF_PATCHER -o $out $in", "Apply patches in $in...")
+        self.writer.rule("elf2dll", "$ELF2DLL -o $out -b $DLL_BSS_TXT -s $DLL_SYMS_MAP $in", "Converting $in to DP DLL $out...")
         self.writer.rule("pack_fs", "$FS_PACKER -o $out $BUILD_DIR/assets", "Repacking assets...")
         self.writer.rule("pack_dlls", 
                          "$DINO_DLL pack $BUILD_DIR/assets/dlls $BUILD_DIR/assets/DLLS.bin $DECOMP_DIR/bin/assets/DLLS_tab.bin "
@@ -327,16 +325,23 @@ class BuildNinjaWriter:
             mapfile_path = f"{obj_dir}/{dll.number}.map"
 
             self.writer.build(elf_path, "ld_dll", dll_link_deps,
-                              variables={"MAPFILE": mapfile_path})
+                              variables={"MAPFILE": mapfile_path},
+                              implicit_outputs=[mapfile_path])
+
+            # Apply patches
+            patched_elf_patch = f"{obj_dir}/{dll.number}.patched.elf"
+            self.writer.build(patched_elf_patch, "patch_elf", elf_path)
 
             # Convert ELF to Dinosaur Planet DLL
             dll_asset_path = f"$BUILD_DIR/assets/dlls/{dll.number}.dll"
             dll_bss_asset_path = f"$BUILD_DIR/assets/dlls/{dll.number}.dll.bss.txt"
-            self.writer.build(dll_asset_path, "elf2dll", elf_path,
+            dll_syms_map_asset_path = f"$BUILD_DIR/assets/dlls/{dll.number}.dll.syms.txt"
+            self.writer.build(dll_asset_path, "elf2dll", patched_elf_patch,
                 variables={
-                    "DLL_BSS_TXT": dll_bss_asset_path
+                    "DLL_BSS_TXT": dll_bss_asset_path,
+                    "DLL_SYMS_MAP": dll_syms_map_asset_path
                 },
-                implicit_outputs=[dll_bss_asset_path])
+                implicit_outputs=[dll_bss_asset_path, dll_syms_map_asset_path])
             pack_deps.append(dll_asset_path)
             pack_deps.append(dll_bss_asset_path)
 

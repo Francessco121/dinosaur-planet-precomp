@@ -1,20 +1,11 @@
 .include "dll_macro.inc"
 
-# Make the lightfoot background green!
-.patch data_18
-    .word 0x009c44ff
-
-# dll_60_update2 does nothing, change it to run our custom code
-.patch dll_60_update2
-    b dll_60_custom_func
-     nop
-
-# hook dll_60_update1 to allow the menu to be skipped
-.patch dll_60_update1
+# hook dll_61_update1 to allow the menu to be skipped
+.patch dll_61_update1
     b splash_skip_helper
      nop
     nop
-dll_60_update1_patch_return:
+dll_61_update1_patch_return:
 
 .text
 function splash_skip_helper
@@ -36,5 +27,5 @@ function splash_skip_helper
     lw     $a1, 0x18($sp)
     lw     $a2, 0x1C($sp)
     lw     $a3, 0x20($sp)
-    j      dll_60_update1_patch_return
+    j      dll_61_update1_patch_return
      addiu $sp, $sp, 0x2C
