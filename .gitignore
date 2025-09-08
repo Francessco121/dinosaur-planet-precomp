@@ -2,6 +2,7 @@
 *.z64
 .vscode
 __pycache__/
-build/
+/build/
 build.ninja
 .ninja_log
+/assets

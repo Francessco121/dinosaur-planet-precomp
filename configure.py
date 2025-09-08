@@ -18,6 +18,11 @@ class BuildConfig:
     def __init__(self, release_build: bool):
         self.release_build = release_build
 
+class AssetFileCopy:
+    def __init__(self, asset_path: Path, build_path: Path):
+        self.asset_path = asset_path
+        self.build_path = build_path
+
 class DecompFileCopy:
     def __init__(self, decomp_path: Path, build_path: Path):
         self.decomp_path = decomp_path
@@ -43,7 +48,7 @@ class DLL:
 class BuildFiles:
     def __init__(self, 
                  core_files: "list[BuildFile]",
-                 asset_copies: "list[DecompFileCopy]",
+                 asset_copies: "list[DecompFileCopy | AssetFileCopy]",
                  dll_copies: "list[DecompFileCopy]",
                  dlls: "list[DLL]"):
         self.core_files = core_files
@@ -417,10 +422,18 @@ class BuildNinjaWriter:
             "$BUILD_DIR/assets/DLLS_tab.bin"
         ]
         for copy in self.input.asset_copies:
-            decomp_path = f"$DECOMP_DIR/{copy.decomp_path.as_posix()}"
-            build_path = f"$BUILD_DIR/{copy.build_path.as_posix()}"
-            self.writer.build(build_path, "file_copy", decomp_path)
-            pack_deps.append(build_path)
+            if isinstance(copy, DecompFileCopy):
+                decomp_path = f"$DECOMP_DIR/{copy.decomp_path.as_posix()}"
+                build_path = f"$BUILD_DIR/{copy.build_path.as_posix()}"
+                self.writer.build(build_path, "file_copy", decomp_path)
+                pack_deps.append(build_path)
+            elif isinstance(copy, AssetFileCopy):
+                asset_path = f"assets/{copy.asset_path.as_posix()}"
+                build_path = f"$BUILD_DIR/{copy.build_path.as_posix()}"
+                self.writer.build(build_path, "file_copy", asset_path)
+                pack_deps.append(build_path)
+            else:
+                raise NotImplementedError()
 
         self.writer.build("$ASSETS_BIN", "pack_fs", implicit=pack_deps)
 
@@ -544,8 +557,16 @@ class InputScanner:
         for asset in FS_MAP:
             if asset in SKIP_ASSETS:
                 continue
-            self.asset_copies.append(DecompFileCopy(
-                Path(f"bin/assets/{asset}"), Path(f"assets/{asset}")))
+            # The decomp uses _tab.bin for tab files but nothing else does, so convert it
+            # when looking for custom asset files.
+            custom_filename = asset.replace("_tab.bin", ".tab")
+            custom_path = Path(f"assets/{custom_filename}")
+            if custom_path.exists():
+                self.asset_copies.append(AssetFileCopy(
+                    Path(custom_filename), Path(f"assets/{asset}")))
+            else:
+                self.asset_copies.append(DecompFileCopy(
+                    Path(f"bin/assets/{asset}"), Path(f"assets/{asset}")))
     
     def __make_obj_path(self, path: Path) -> Path:
         return path.with_suffix('.o')
