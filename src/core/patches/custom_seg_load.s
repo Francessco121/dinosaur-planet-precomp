@@ -22,3 +22,4 @@ function custom_seg_load
     addiu $sp, $sp, 0x20
     jr $ra
      nop
+endfunction custom_seg_load

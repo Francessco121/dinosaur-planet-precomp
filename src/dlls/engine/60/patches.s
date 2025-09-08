@@ -1,15 +1,5 @@
 .include "dll_macro.inc"
 
-# Make the lightfoot background green!
-.patch data_18
-    .word 0x009c44ff
-
-.ifdef DEBUG
-# dll_60_update2 does nothing, redirect its export to our custom code
-.patch .exports 0x18 # Export 1
-    .dword dll_60_custom_func
-.endif
-
 # hook the dll_60_update1 export to allow the menu to be skipped
 .patch .exports 0x10 # Export 0
     .dword splash_skip_helper
@@ -31,3 +21,4 @@ function splash_skip_helper
     jr $ra
      nop
 .endif
+endfunction splash_skip_helper

@@ -1,25 +1,11 @@
 #include "sys/controller.h"
 #include "sys/main.h"
-#include "sys/print.h"
 #include "dll.h"
 
-extern u8 data_0;
 extern u8 data_4;
 
 extern f32 bss_0;
-extern s8 bss_4;
 extern s8 bss_6;
-extern f32 bss_8;
-extern f32 bss_C;
-extern f32 bss_10;
-
-#if DEBUG
-void dll_60_custom_func(void) {
-    diPrintfSetBG(36, 97, 72, 255);
-    diPrintf("dll 60 bss_0 = %.2f\n", bss_0);
-    diPrintf("dll 60 bss_6 = %d\n", bss_6);
-}
-#endif
 
 void splash_skip_update(void) {
     if (data_4 == 1) {

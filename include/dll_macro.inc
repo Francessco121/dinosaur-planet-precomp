@@ -26,6 +26,12 @@
     .type \label @function 
     .balign 4
     \label:
+        .ent \label
+.endm
+
+.macro endfunction label
+    .size \label, . - \label
+    .end \label
 .endm
 
 .macro .patch symbol offset=0x0

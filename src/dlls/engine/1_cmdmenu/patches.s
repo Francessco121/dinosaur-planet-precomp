@@ -1,5 +1,6 @@
 .include "dll_macro.inc"
 
+# @dinomod:
 # Initialize showInfoTextID to -1 instead of 0 to prevent the "info box" from rendering 
 # in the uncleared framebuffer above the main viewport.
 .patch dll_1_ctor 0x2C

@@ -29,3 +29,4 @@ function splash_skip_helper
     lw     $a3, 0x20($sp)
     j      dll_61_update1_patch_return
      addiu $sp, $sp, 0x2C
+endfunction splash_skip_helper
