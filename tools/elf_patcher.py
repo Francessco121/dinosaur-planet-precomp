@@ -1,6 +1,7 @@
 # Handles precomp .patch* sections for ELF files
 
 import argparse
+import bisect
 import math
 import re
 from typing import Protocol
@@ -83,8 +84,8 @@ def align(n: int, alignment: int) -> int:
     return math.ceil(n / alignment) * alignment
 
 # .patch:<symbol>:<offset>
-PATCH_SECTION_NAME_REGEX = re.compile(r"\.patch:(\w+):(\w+)")
-VALID_PATCH_SECTION_TARGETS = set([".text", ".rodata", ".data"])
+PATCH_SECTION_NAME_REGEX = re.compile(r"\.patch:([\.\w]+):(\w+)")
+VALID_PATCH_SECTION_TARGETS = set([".text", ".rodata", ".data", ".exports"])
 
 def do_patching(elf: EditedELF):
     shstrtab: EditedRawSection = elf.sections[elf.elf.header['e_shstrndx']]
@@ -168,7 +169,7 @@ def do_patching(elf: EditedELF):
                 for reloc in reloc_section.relocations:
                     # Relocate reloc to patched location relative to the section being patched
                     reloc.entry["r_offset"] += offset
-                    target_reloc_section.relocations.append(reloc)
+                    bisect.insort(target_reloc_section.relocations, reloc, key=lambda r: r.entry["r_offset"])
             
             # Migrate symbols to target section
             for sym in elf.symtab.syms:
