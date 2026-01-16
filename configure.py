@@ -261,7 +261,7 @@ class BuildNinjaWriter:
         self.writer.variable("ELF_PATCHER", f"{sys.executable} tools/elf_patcher.py")
         self.writer.variable("MAKE_DLLSIMPORTTAB", f"{sys.executable} tools/make_dllsimporttab.py")
         self.writer.variable("DINO_DLL", f"{sys.executable} $DECOMP_DIR/tools/dino_dll.py")
-        self.writer.variable("ELF2DLL", f"{sys.executable} $DECOMP_DIR/tools/elf2dll.py")
+        self.writer.variable("ELF2DLL", f"{sys.executable} $DECOMP_DIR/tools/elf2dll_chooser.py")
 
         self.writer.newline()
 

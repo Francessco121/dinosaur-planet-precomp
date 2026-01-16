@@ -1,4 +1,4 @@
-#include "sys/controller.h"
+#include "sys/joypad.h"
 #include "sys/main.h"
 #include "dll.h"
 
@@ -12,13 +12,13 @@ void splash_skip_update(void) {
         return;
     }
 
-    if ((get_button_presses(0) & A_BUTTON) != 0) {
+    if ((joy_get_pressed(0) & A_BUTTON) != 0) {
         // Fade in background if we haven't shown it yet
         if (bss_0 <= 240.0f) {
             gDLL_28_ScreenFade->vtbl->fade_reversed(30, SCREEN_FADE_BLACK);
         }
         // Let 1 frame render first so the background shows up for the next menu (we render it)
-        bss_0 = 720.0f - delayFloat - 0.01f;
+        bss_0 = 720.0f - gUpdateRateF - 0.01f;
         bss_6 = 2;
     }
 }

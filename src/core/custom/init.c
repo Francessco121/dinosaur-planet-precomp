@@ -19,7 +19,7 @@ void custom_init(void) {
     // A4AA0 - A4970
     size = (s32)&__file1Address - (s32)&__fstAddress;
 
-    gFST = (Fs *)malloc(size, 0x7F7F7FFF, NULL);
+    gFST = (Fs *)mmAlloc(size, 0x7F7F7FFF, NULL);
     read_from_rom((u32)&__fstAddress, (u8 *)gFST, size);
 
     // Finish loading custom code segment

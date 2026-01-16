@@ -111,11 +111,11 @@ SECTIONS
     }
     END_NOLOAD(custom)
 
-    /* Replace init_memory */
+    /* Replace mmInit */
     /* In addition to adjusting heap sizes, this changes the heaps to start after the custom segment (so they don't overlap) */
-    CODE_PATCH(segment, init_memory, 0x0)
+    CODE_PATCH(segment, mmInit, 0x0)
     {
-        BUILD_DIR/src/core/patches/init_memory.o(.text);
+        BUILD_DIR/src/core/patches/mmInit.o(.text);
     }
 
     /* Hijack init_filesystem right after osCreatePiManager is called to load our custom segment. */
